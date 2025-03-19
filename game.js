@@ -49,14 +49,37 @@
        updateMeters();
    }, 1000);
 
-   const controls = new THREE.PointerLockControls(camera, document.body);
+   // Add device detection
+   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+   // Set instructions based on device
+   const instructions = document.getElementById('instructions');
+   if (isMobile) {
+       instructions.innerHTML = "Touch and drag to look around";
+   } else {
+       instructions.innerHTML = "Click on the screen and look around<br>Use WASD or arrow keys to move";
+   }
+
+   // Initialize appropriate controls based on device
+   let controls;
+   if (isMobile) {
+       controls = new THREE.OrbitControls(camera, renderer.domElement);
+       controls.enableZoom = false; // Disable pinch-to-zoom
+       controls.enablePan = false; // Disable panning
+       controls.minPolarAngle = Math.PI / 2; // Limit vertical rotation to horizontal plane
+       controls.maxPolarAngle = Math.PI / 2;
+       controls.target.set(0, 1.7, -1); // Set the point to orbit around
+       camera.position.set(0, 1.7, 0);
+   } else {
+       controls = new THREE.PointerLockControls(camera, document.body);
+   }
 
    // Movement variables
    let moveForward = false;
    let moveBackward = false;
    let moveLeft = false;
    let moveRight = false;
-   const moveSpeed = 0.02; // Further reduced movement speed for more precise control
+   const moveSpeed = 0.02;
 
    // Room boundaries (adjusted for smaller room)
    const roomBounds = {
@@ -68,52 +91,54 @@
        maxY: 2    // Ceiling
    };
 
-   // Handle keyboard events
-   document.addEventListener('click', function() {
-       controls.lock();
-   });
+   // Handle keyboard events - only for desktop
+   if (!isMobile) {
+       document.addEventListener('click', function() {
+           controls.lock();
+       });
 
-   document.addEventListener('keydown', function(event) {
-       switch (event.code) {
-           case 'ArrowUp':
-           case 'KeyW':
-               moveForward = true;
-               break;
-           case 'ArrowDown':
-           case 'KeyS':
-               moveBackward = true;
-               break;
-           case 'ArrowLeft':
-           case 'KeyA':
-               moveLeft = true;
-               break;
-           case 'ArrowRight':
-           case 'KeyD':
-               moveRight = true;
-               break;
-       }
-   });
+       document.addEventListener('keydown', function(event) {
+           switch (event.code) {
+               case 'ArrowUp':
+               case 'KeyW':
+                   moveForward = true;
+                   break;
+               case 'ArrowDown':
+               case 'KeyS':
+                   moveBackward = true;
+                   break;
+               case 'ArrowLeft':
+               case 'KeyA':
+                   moveLeft = true;
+                   break;
+               case 'ArrowRight':
+               case 'KeyD':
+                   moveRight = true;
+                   break;
+           }
+       });
 
-   document.addEventListener('keyup', function(event) {
-       switch (event.code) {
-           case 'ArrowUp':
-           case 'KeyW':
-               moveForward = false;
-               break;
-           case 'ArrowDown':
-           case 'KeyS':
-               moveBackward = false;
-               break;
-           case 'ArrowLeft':
-           case 'KeyA':
-               moveLeft = false;
-               break;
-           case 'ArrowRight':
-           case 'KeyD':
-               moveRight = false;
-               break;
-       }
-   });
+       document.addEventListener('keyup', function(event) {
+           switch (event.code) {
+               case 'ArrowUp':
+               case 'KeyW':
+                   moveForward = false;
+                   break;
+               case 'ArrowDown':
+               case 'KeyS':
+                   moveBackward = false;
+                   break;
+               case 'ArrowLeft':
+               case 'KeyA':
+                   moveLeft = false;
+                   break;
+               case 'ArrowRight':
+               case 'KeyD':
+                   moveRight = false;
+                   break;
+           }
+       });
+   }
 
    // Character management
    const characters = {
@@ -210,12 +235,16 @@
        
        const deltaTime = clock.getDelta();
 
-       if (controls.isLocked) {
+       if (!isMobile && controls.isLocked) {
            if (moveForward) controls.moveForward(moveSpeed);
            if (moveBackward) controls.moveForward(-moveSpeed);
            if (moveLeft) controls.moveRight(-moveSpeed);
            if (moveRight) controls.moveRight(moveSpeed);
            checkCollision();
+       }
+
+       if (isMobile) {
+           controls.update(); // Update OrbitControls
        }
 
        updateCharacters(deltaTime);
