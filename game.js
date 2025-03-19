@@ -16,7 +16,7 @@
 
    // Load the GLTF model
    const loader = new THREE.GLTFLoader();
-   loader.load('assets/models/bedroom.glb', function (gltf) {
+   loader.load('https://cdn.glitch.me/750dd95e-22a2-4c4e-9269-d117f313c1b4/bedroom.glb?v=1742420523812', function (gltf) {
        console.log('Model loaded successfully');
        const model = gltf.scene;
        scene.add(model);
