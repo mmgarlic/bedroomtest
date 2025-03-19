@@ -1,0 +1,19 @@
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+#meters {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+}
+
+.meter {
+    width: 100px;
+    height: 20px;
+    background-color: #ccc;
+    margin: 5px 0;
+    border: 1px solid #000;
+}
